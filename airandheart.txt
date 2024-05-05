@@ -1,0 +1,194 @@
+import pandas as pd
+import numpy as np
+
+#default encoding on windows
+df = pd.read_csv('AirQuality.csv',encoding='cp1252')
+df
+
+
+df.describe()
+
+
+#Cleaning the dataset
+df.info()
+
+
+#  Dropping columns which are not required
+df = df.drop(['stn_code','agency', 'location_monitoring_station'],axis=1)
+
+
+df.isna().sum()
+
+df.columns
+
+
+df['type'].unique()
+
+types = {
+    
+    "Residential" : "K",
+    "Residential and others" : "RO",
+    "Industrial Area":"I" ,
+    "Industrial Areas" : "I",
+    "Industrial" : "I" ,
+    "Sensitive Area": "s",
+    "Sensitive Areas":"s",
+    "Sensitive":"s",
+    "NaN":"PRO",
+    "Residential, Rural and other Areas":"MO"
+ }
+
+
+df.type = df.type.replace(types)
+
+
+df['type'].unique()
+
+
+df.info()
+
+df.head()
+
+#Handling missing values
+#  define columns of importance, which shall be used regularely
+
+COLS = ['so2','no2', 'rspm', 'spm', 'pm2_5']
+
+
+
+
+import numpy as np
+from sklearn.impute import SimpleImputer
+
+# invoking SimpleImputer to fill missing values
+
+imputer = SimpleImputer(missing_values = np.nan, strategy='mean')
+
+
+
+
+df[COLS] = imputer.fit_transform(df[COLS])
+
+
+
+df.head()
+
+
+#Data Transformation
+df.nunique()
+
+
+df.duplicated().sum()
+
+df.drop_duplicates()
+
+
+from sklearn.preprocessing import LabelEncoder
+labelencoder = LabelEncoder()
+df['state'] =labelencoder.fit_transform(df['state'])
+df.head()
+
+
+
+# One-hot encoding is used to convert categorical variables into a format that can be readily used by machine learning algorithms.
+
+dfAndhra = df[df['state']==0]
+dfAndhra
+
+
+from sklearn.preprocessing import OneHotEncoder
+onehotencoder = OneHotEncoder(sparse=False, handle_unknown='error', drop='first')
+
+
+
+pd.DataFrame(onehotencoder.fit_transform(dfAndhra[['location']]))
+
+
+dfAndhra['location'].value_counts()
+
+
+#Error correction
+df.isnull().sum()
+
+
+
+df=df.fillna(df.median())
+df.isnull().sum()
+
+
+df.describe()
+
+
+
+df[df['so2']>100]=0
+
+
+df = pd.read_csv('heart.csv')
+df
+
+df.info()
+
+df.dtypes
+
+df.nunique()
+
+#Error correction
+df['ca'].unique()
+
+df.ca.value_counts()
+
+
+df.loc[df['ca']==4]
+
+
+df.loc[df['ca']==4,'ca']=np.NaN
+
+df=df.fillna(df.median())
+df.isnull().sum()
+
+
+#Checking for duplicate row
+duplicates = df.duplicated(keep=False).sum()
+duplicates
+
+#Data model building
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
+
+
+# Splitting our Dataset
+
+X = df.drop('target', axis=1)
+y = df.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1)
+
+
+
+#Import svm model
+from sklearn import svm
+
+#Create a svm Classifier
+clf = svm.SVC(kernel='linear') # Linear Kernel
+
+#Train the model using the training sets
+clf.fit(X_train, y_train)
+
+#Predict the response for test dataset
+y_pred = clf.predict( X_test)
+
+
+
+from sklearn import metrics
+
+# Model Accuracy
+accuracy = metrics.accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
+
+# Model Precision: what percentage of positive tuples are labeled as such?
+print("Precision:",metrics.precision_score(y_test, y_pred))
+
+# Model Recall: what percentage of positive tuples are labelled as such?
+print("Recall:",metrics.recall_score(y_test, y_pred))
